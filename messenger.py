@@ -1,4 +1,5 @@
 import smtplib
+import requests
 from email.mime.text import MIMEText
 from email.mime.image import MIMEImage
 from email.mime.multipart import MIMEMultipart
@@ -12,9 +13,7 @@ class Messenger:
         smtp_port: int,
         email_user: str,
         email_password: str,
-        wpp_api_url: str,
-        wpp_api_key: str,
-        wpp_phone_number: str,
+        telegram_base_api_url: str,
     ):
         """
         Initializes the NotificationService with SMTP credentials and configurations.
@@ -23,17 +22,14 @@ class Messenger:
         :param smtp_port: The SMTP server port (e.g., 587 for TLS)
         :param email_user: The email address for authentication
         :param email_password: The email password for authentication
-        :param api_url: The URL of the WhatsApp API
-        :param api_key: The API key for authentication
-        :param phone_number: The recipient's phone number (including country code)
+        :param telegram_base_api_url: The URL of the base Telegram API (with the token already included)
+
         """
         self.smtp_server = smtp_server
         self.smtp_port = smtp_port
         self.email_user = email_user
         self.email_password = email_password
-        self.wpp_api_url = wpp_api_url
-        self.wpp_api_key = wpp_api_key
-        self.wpp_phone_number = wpp_phone_number
+        self.telegram_base_api_url = telegram_base_api_url
 
     def send_email(
         self,
@@ -84,3 +80,30 @@ class Messenger:
             print(f"Email sent successfully to {recipient_email}.")
         except Exception as e:
             print(f"Failed to send email: {e}")
+
+    def send_telegram_message(
+        self, message: str, image_path: str, chat_id: str
+    ) -> None:
+        """
+        Sends a message with a photo to a specific Telegram chat using a bot.
+        Note: the bot needs to be configured & added to the chat beforehand.
+
+        :param image_path: The path to the photo file.
+        :param message: The message caption to send sent along the photo.
+        :param chat_id: Chat ID for the group where the bot will send the message to
+        """
+        url = f"{self.telegram_base_api_url}/sendPhoto"
+        print(url)
+        try:
+            with open(image_path, "rb") as photo:
+                files = {"photo": photo}
+                payload = {"chat_id": chat_id, "caption": message}
+                response = requests.post(url, data=payload, files=files)
+                response.raise_for_status()
+                return True
+        except requests.RequestException as e:
+            print(f"Error sending photo: {e}")
+            return False
+        except FileNotFoundError:
+            print(f"Photo not found at: {image_path}")
+            return False
