@@ -1,10 +1,11 @@
-# e-mail configuriton parameters
-SMTP_SERVER = ""
+# E-mail configuriton parameters
+SMTP_SERVER = 
 SMTP_PORT = 
-EMAIL_USER = ""
-EMAIL_PASSWORD = ""
-EMAIL_RECIPIENTS = []
+EMAIL_USER = 
+EMAIL_PASSWORD = 
+EMAIL_RECIPIENTS = [ ]  # list of e-mails that will receive the message
 
-# WhatsApp configution parameters (has to be a business account for it to work)
-WHATSAPP_API_URL = ""
-WHATSAPP_API_KEY = ""
+# Telegram configution parameters
+TELEGRAM_API_KEY = 
+TELEGRAM_BASE_API_URL = f"https://api.telegram.org/bot{TELEGRAM_API_KEY}"
+TELEGRAM_CHAT_ID =   # chat id for the group where the bot will send the message to
