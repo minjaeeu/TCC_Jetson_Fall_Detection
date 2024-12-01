@@ -4,8 +4,8 @@ from config import (
     EMAIL_USER,
     EMAIL_PASSWORD,
     EMAIL_RECIPIENTS,
-    WHATSAPP_API_URL,
-    WHATSAPP_API_KEY,
+    TELEGRAM_BASE_API_URL,
+    TELEGRAM_CHAT_ID,
 )
 from messenger import Messenger
 
@@ -16,12 +16,10 @@ messenger = Messenger(
     smtp_port=SMTP_PORT,
     email_user=EMAIL_USER,
     email_password=EMAIL_PASSWORD,
-    wpp_api_key="teste",
-    wpp_api_url="teste",
-    wpp_phone_number="teste",
+    telegram_base_api_url=TELEGRAM_BASE_API_URL,
 )
 
-# Send the same e-mail for all the recipients inside the EMAIL_RECIPIENTS list
+# # Send the same e-mail for all the recipients inside the EMAIL_RECIPIENTS list
 for recipient in EMAIL_RECIPIENTS:
     messenger.send_email(
         recipient_email=recipient,
@@ -30,3 +28,10 @@ for recipient in EMAIL_RECIPIENTS:
         image_filename="example_pic.jpeg",
         image_path=".\example_pic.jpeg",
     )
+
+# Send a message + image to a Telegram chat group
+messenger.send_telegram_message(
+    message="hello world, this is a test",
+    image_path=".\example_pic.jpeg",
+    chat_id=TELEGRAM_CHAT_ID,
+)
