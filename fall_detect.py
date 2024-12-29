@@ -1,12 +1,12 @@
 import jetson_utils
 
 
-def is_person_fallen(pose, keypoints_threshold):
+def is_person_fallen(pose, keypoints_threshold: int):
     """
     Checks if a person is potentially fallen based on keypoint positions.
 
     Args:
-        pose (jetson_inference.poseNet): A pose object from poseNet containing keypoints and bounding box information.
+        pose: A pose object from poseNet containing keypoints and bounding box information.
         keypoints_threshold (int): Threshold to determine abnormal keypoint proximity.
 
     Returns:
@@ -14,6 +14,11 @@ def is_person_fallen(pose, keypoints_threshold):
     """
     if not pose.Keypoints:
         return False  # If there are no keypoints, no detection is possible
+
+    # Initialize variables to store the positions of key relevant keypoints
+    hip_y = None
+    shoulder_y = None
+    ankle_y = None
 
     # Identify keypoints relevant for analysis
     for keypoint in pose.Keypoints:
