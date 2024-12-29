@@ -1,0 +1,2 @@
+The last frame captured by the fall dectection will be stored here
+
