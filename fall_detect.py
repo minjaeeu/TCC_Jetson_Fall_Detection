@@ -2,13 +2,18 @@ import jetson_utils
 
 
 def is_person_fallen(pose, keypoints_threshold):
-    """Checks if a person is potentially fallen based on keypoint positions."""
+    """
+    Checks if a person is potentially fallen based on keypoint positions.
+
+    Args:
+        pose (jetson_inference.poseNet): A pose object from poseNet containing keypoints and bounding box information.
+        keypoints_threshold (int): Threshold to determine abnormal keypoint proximity.
+
+    Returns:
+        bool: True if the person is potentially fallen, False otherwise.
+    """
     if not pose.Keypoints:
         return False  # If there are no keypoints, no detection is possible
-
-    hip_y = None
-    shoulder_y = None
-    ankle_y = None
 
     # Identify keypoints relevant for analysis
     for keypoint in pose.Keypoints:
@@ -21,32 +26,41 @@ def is_person_fallen(pose, keypoints_threshold):
 
     # Check relative positions of keypoints
     if hip_y and shoulder_y:
+        abs_value = abs(hip_y - shoulder_y)
         # Condition: Hips are close to shoulders or ankles (abnormal position)
-        print(
-            "Hip and shoulder absolute value below threshold:  ",
-            abs(hip_y - shoulder_y),
-        )
-        if abs(hip_y - shoulder_y) < keypoints_threshold:
+        print("Hip and shoulder absolute value below threshold:  ", abs_value)
+        if abs_value < keypoints_threshold:
             return True  # Conditions met, person is potentially fallen
 
     if hip_y and ankle_y:
         # Condition: Hips are close to shoulders or ankles (abnormal position)
-        print("Hip and ankle absolute value below threshold:  ", abs(hip_y - ankle_y))
-        if abs(hip_y - ankle_y) < keypoints_threshold:
+        abs_value = abs(hip_y - ankle_y)
+        print("Hip and ankle absolute value below threshold:  ", abs_value)
+        if abs_value < keypoints_threshold:
             return True  # Conditions met, person is potentially fallen
 
     return False  # If conditions are not met
 
 
 def is_rectangle_ratio_grt_1(pose, frame):
-    # Draw skeleton
+    """
+    Determines if the bounding box around a pose has a width-to-height ratio greater than 1.
+
+    Args:
+        pose (jetson_inference.poseNet): A pose object from poseNet containing keypoints and bounding box information.
+        frame (jetson_utils.cudaImage): The frame to draw the bounding box on.
+
+    Returns:
+        bool: True if the width-to-height ratio is greater than 1, False otherwise.
+    """
+    # skeleton boundary
     left = int(pose.Left)
     top = int(pose.Top)
     right = int(pose.Right)
     bottom = int(pose.Bottom)
 
     width = left - right
-    height = float(top - bottom)
+    height = top - bottom
 
     # early return in case there is no way to draw the outline box
     if height == 0:
