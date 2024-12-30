@@ -17,6 +17,7 @@ from config import (
     KEYPOINTS_THRESHOLD,
     ALERT_TIME_THRESHOLD,
     FRAME_OUTPUT_PATH,
+    NAME,
 )
 from messenger import Messenger
 from fall_detect import is_person_fallen, is_rectangle_ratio_grt_1
@@ -39,7 +40,7 @@ messenger = Messenger(
     telegram_base_api_url=TELEGRAM_BASE_API_URL,
 )
 
-lastSaveTime = time.perf_counter()
+lastSaveTime = time.perf_counter()  # time counter
 
 if __name__ == "__main__":
     key = True
@@ -64,27 +65,31 @@ if __name__ == "__main__":
                     currentTime = time.perf_counter()
                     # sends a new alert after a given time threshold
                     if (currentTime - lastSaveTime) >= ALERT_TIME_THRESHOLD:
-                        # # Send the same e-mail for all the recipients inside the EMAIL_RECIPIENTS list
+                        # Path there the last frame will be saved to
+                        fall_time = datetime.datetime.now()
+                        last_frame_path = f"{FRAME_OUTPUT_PATH}_{fall_time}.jpg"
+                        # Saving last frame into above mentioned path
+                        jetson_utils.saveImage(
+                            last_frame_path,
+                            frame,
+                        )
+                        # Send the same e-mail for all the recipients inside the EMAIL_RECIPIENTS list
                         for recipient in EMAIL_RECIPIENTS:
                             messenger.send_email(
                                 recipient_email=recipient,
-                                subject="Hi this is test v2",
-                                body="Hello world, this is a test using smtplib & Python",
-                                image_filename="example_pic.jpeg",
-                                image_path="example_pic.jpeg",
+                                subject=f"SOCORRO!!! QUEDA DE {NAME.upper()} DETECTADA ÀS {fall_time.strftime('%Y-%m-%d %H:%M:%S')}",
+                                body=f"Uma possível queda foi detectada! Por favor, verifique a situação atual de {NAME}.",
+                                image_filename=last_frame_path,
+                                image_path=last_frame_path,
                             )
 
                         # Send a message + image to a Telegram chat group
                         messenger.send_telegram_message(
-                            message="hello world, this is a test",
-                            image_path="example_pic.jpeg",
+                            message=f"Uma possível queda foi detectada! Por favor, verifique a situação atual de {NAME}.",
+                            image_path=last_frame_path,
                             chat_id=TELEGRAM_CHAT_ID,
                         )
-                        jetson_utils.saveImage(
-                            f"{FRAME_OUTPUT_PATH}/fall_image_{datetime.datetime.now()}.jpg",
-                            frame,
-                        )
-                        lastSaveTime = currentTime
+                        lastSaveTime = currentTime  # updates time counter
                     break
 
             # Render the frame with detected poses
