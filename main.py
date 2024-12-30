@@ -1,5 +1,7 @@
 import jetson_inference
 import jetson_utils
+import time
+import datetime
 from config import (
     SMTP_SERVER,
     SMTP_PORT,
@@ -35,6 +37,7 @@ messenger = Messenger(
     telegram_base_api_url=TELEGRAM_BASE_API_URL,
 )
 
+lastSaveTime = time.perf_counter()
 
 if __name__ == "__main__":
     key = True
@@ -56,7 +59,9 @@ if __name__ == "__main__":
                     print("*****************")
                     print("ALERT: Person potentially fallen!\n")
 
-                    if key:
+                    currentTime = time.perf_counter()
+
+                    if (currentTime - lastSaveTime) >= 30.0:
                         # # Send the same e-mail for all the recipients inside the EMAIL_RECIPIENTS list
                         for recipient in EMAIL_RECIPIENTS:
                             messenger.send_email(
@@ -73,7 +78,10 @@ if __name__ == "__main__":
                             image_path="example_pic.jpeg",
                             chat_id=TELEGRAM_CHAT_ID,
                         )
-                        key = False
+                        jetson_utils.saveImage(
+                            f"my_image_{datetime.datetime.now()}.jpg", frame
+                        )
+                        lastSaveTime = currentTime
                     break
 
             # Render the frame with detected poses
