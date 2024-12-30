@@ -11,6 +11,7 @@ from config import (
     TELEGRAM_BASE_API_URL,
     TELEGRAM_CHAT_ID,
     JETSON_CAMERA_INPUT,
+    JETSON_CAMERA_ARGS,
     JETSON_DISPLAY_OUTPUT,
     JETSON_POSE_NET_MODEL,
     JETSON_POSE_NET_THRESHOLD,
@@ -22,14 +23,16 @@ from config import (
 from messenger import Messenger
 from fall_detect import is_person_fallen, is_rectangle_ratio_grt_1
 
-# Camera and video output configuration
-camera = jetson_utils.videoSource(JETSON_CAMERA_INPUT)  # Camera
-output = jetson_utils.videoOutput(JETSON_DISPLAY_OUTPUT)  # Output display
-
 # Load the PoseNet model
 net = jetson_inference.poseNet(
     JETSON_POSE_NET_MODEL, threshold=JETSON_POSE_NET_THRESHOLD
 )
+# Camera input and video output configuration
+output = jetson_utils.videoOutput(JETSON_DISPLAY_OUTPUT)  # Output display
+input = jetson_utils.videoSource(
+    JETSON_CAMERA_INPUT, argv=JETSON_CAMERA_ARGS
+)  # Input camera feed
+
 
 # Creates an instance of the notification service
 messenger = Messenger(
@@ -40,15 +43,15 @@ messenger = Messenger(
     telegram_base_api_url=TELEGRAM_BASE_API_URL,
 )
 
-lastSaveTime = time.perf_counter()  # time counter
+lastSaveTime = time.perf_counter()  # Timer
 
 if __name__ == "__main__":
-    key = True
     try:
-        while output.IsStreaming():
+        while True:
             # Capture a frame from the camera
-            frame = camera.Capture()
-
+            frame = input.Capture()
+            if frame is None:
+                continue
             # Process the frame to detect poses
             poses = net.Process(frame)
 
@@ -63,7 +66,7 @@ if __name__ == "__main__":
                     print("ALERT: Person potentially fallen!\n")
 
                     currentTime = time.perf_counter()
-                    # sends a new alert after a given time threshold
+                    # Sends a new alert after a given time threshold
                     if (currentTime - lastSaveTime) >= ALERT_TIME_THRESHOLD:
                         # Path there the last frame will be saved to
                         fall_time = datetime.datetime.now()
@@ -85,11 +88,11 @@ if __name__ == "__main__":
 
                         # Send a message + image to a Telegram chat group
                         messenger.send_telegram_message(
-                            message=f"Uma possível queda foi detectada! Por favor, verifique a situação atual de {NAME}.",
+                            message=f"Uma possível queda foi detectada às {fall_time.strftime('%Y-%m-%d %H:%M:%S')}! Por favor, verifique a situação atual de {NAME}.",
                             image_path=last_frame_path,
                             chat_id=TELEGRAM_CHAT_ID,
                         )
-                        lastSaveTime = currentTime  # updates time counter
+                        lastSaveTime = currentTime  # Updates timer
                     break
 
             # Render the frame with detected poses
