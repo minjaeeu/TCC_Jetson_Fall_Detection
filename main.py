@@ -15,6 +15,8 @@ from config import (
     JETSON_POSE_NET_MODEL,
     JETSON_POSE_NET_THRESHOLD,
     KEYPOINTS_THRESHOLD,
+    ALERT_TIME_THRESHOLD,
+    FRAME_OUTPUT_PATH,
 )
 from messenger import Messenger
 from fall_detect import is_person_fallen, is_rectangle_ratio_grt_1
@@ -60,8 +62,8 @@ if __name__ == "__main__":
                     print("ALERT: Person potentially fallen!\n")
 
                     currentTime = time.perf_counter()
-
-                    if (currentTime - lastSaveTime) >= 30.0:
+                    # sends a new alert after a given time threshold
+                    if (currentTime - lastSaveTime) >= ALERT_TIME_THRESHOLD:
                         # # Send the same e-mail for all the recipients inside the EMAIL_RECIPIENTS list
                         for recipient in EMAIL_RECIPIENTS:
                             messenger.send_email(
@@ -79,7 +81,8 @@ if __name__ == "__main__":
                             chat_id=TELEGRAM_CHAT_ID,
                         )
                         jetson_utils.saveImage(
-                            f"my_image_{datetime.datetime.now()}.jpg", frame
+                            f"{FRAME_OUTPUT_PATH}/fall_image_{datetime.datetime.now()}.jpg",
+                            frame,
                         )
                         lastSaveTime = currentTime
                     break
