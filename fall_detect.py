@@ -6,7 +6,7 @@ def is_person_fallen(pose, keypoints_threshold: int):
     Checks if a person is potentially fallen based on keypoint positions.
 
     Args:
-        pose: A pose object from poseNet containing keypoints and bounding box information.
+        pose (jetson_inference.poseNet): A pose object from poseNet containing keypoints and bounding box information.
         keypoints_threshold (int): Threshold to determine abnormal keypoint proximity.
 
     Returns:
@@ -64,11 +64,12 @@ def is_rectangle_ratio_grt_1(pose, frame):
     right = int(pose.Right)
     bottom = int(pose.Bottom)
 
-    width = left - right
-    height = top - bottom
+    width = abs(left - right)
+    height = abs(top - bottom)
 
     # early return in case there is no way to draw the outline box
-    if height == 0:
+    if width == 0 or height == 0:
+        print("cannot draw rect")
         return False
     else:
         # Draw bounding box
