@@ -55,7 +55,6 @@ if __name__ == "__main__":
             # Process the frame to detect poses
             poses = net.Process(frame)
 
-            # Display information about detected poses and check if anyone is fallen
             for pose in poses:
                 if is_rectangle_ratio_grt_1(
                     pose=pose, frame=frame

@@ -16,8 +16,8 @@ JETSON_CAMERA_ARGS = ["--input-codec=h264", "--input-height=480", "--input-width
 JETSON_DISPLAY_OUTPUT = 
 JETSON_POSE_NET_MODEL = 
 JETSON_POSE_NET_THRESHOLD = 
-KEYPOINTS_THRESHOLD = 
-ALERT_TIME_THRESHOLD = 
+KEYPOINTS_THRESHOLD = # I found that 100 is a good starting point
+ALERT_TIME_THRESHOLD = # In seconds, ex: 10.0 (10 seconds)
 FRAME_OUTPUT_PATH = "output/fall_image"
 
 # Name of the person who is being supervised
